@@ -1,0 +1,19 @@
+[project]
+name = "gym-qwop"
+version = "0.1.0"
+description = "A Gymnasium environment for QWOP, the Bennett Foddy sprinting game"
+readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "Drake Svoboda", email = "drakesvoboda@gmail.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "gymnasium>=0.28.0",
+    "selenium>=3.0.0",
+    "requests>=2.25.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.10,<0.13.0"]
+build-backend = "uv_build"
