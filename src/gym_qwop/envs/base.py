@@ -5,6 +5,8 @@ Also holds the infrastructure shared by every Selenium-driven environment varian
 server, launching a Firefox tab to run it, frame-rate throttling, and resource cleanup.
 """
 import os
+import sys
+import shutil
 import time
 import logging
 from abc import ABC, abstractmethod
@@ -150,10 +152,24 @@ class BaseQWOPEnv(gymnasium.Env, ABC):
             logger.warning(f"Could not start game server: {e}")
             return None
 
+    # Standard install location when Firefox was installed the normal way on macOS
+    # (downloaded from mozilla.org, dragged into Applications) - that install method
+    # never puts a `firefox` binary on PATH, which is the only place geckodriver looks
+    # by default on this platform. Without this, launching fails with a generic
+    # "Process unexpectedly closed with status 1" that looks like a missing-Firefox
+    # error but isn't - Firefox is there, geckodriver just never finds it.
+    _MACOS_FIREFOX_BINARY = "/Applications/Firefox.app/Contents/MacOS/firefox"
+
     def _launch_browser(self, url: str, headless: bool, enable_sound: bool = False):
         """Launch a Firefox tab pointed at `url` and return the WebDriver."""
         try:
             options = webdriver.FirefoxOptions()
+            if (
+                sys.platform == "darwin"
+                and shutil.which("firefox") is None
+                and os.path.exists(self._MACOS_FIREFOX_BINARY)
+            ):
+                options.binary_location = self._MACOS_FIREFOX_BINARY
             if headless:
                 options.add_argument("--headless")
             if not enable_sound:
